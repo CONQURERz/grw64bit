@@ -5101,7 +5101,7 @@ function _G.InitModMenuTab()
     local FakeTextMap = {
         [999000] = T(" MOD FREE Cẩn Thận Bị Lừa Mod Chủ Quyền", "SAMEER MENU"),
         [999001] = T("HIỂN THỊ (ESP)", "VISUALS (ESP) MENU"),
-     [999002] = T("AIMBOT GỐC & ĐẠN MENU", "NATIVE HIGH & RISK TRACK"),
+  --   [999002] = T("AIMBOT GỐC & ĐẠN MENU", "NATIVE HIGH & RISK TRACK"),
        [999003] = T("AIMBOT ROYAL - CUSTOM ( Aim Gần - Aim Scope )", "CUSTOM AIMBOT (Close & Scope)"),
        [999004] = T("HỖ TRỢ & ĐỒ HỌA", "SUPPORT & GRAPHICS"),
        [999005] = T("MOD SKIN DỄ BỊ", "MOD SKIN (MENU)"),
@@ -5310,7 +5310,7 @@ function _G.InitModMenuTab()
                  { Key = "Cat_ESP", Text = 999001, Stack = StackESP },
                  { Key = "Cat_ESPV1", Text = 999007, Stack = StackESPV1 },
                  { Key = "Cat_AimbotV1", Text = 999008, Stack = StackAimbotV1 },
-                { Key = "Cat_Aimbot", Text = 999002, Stack = StackAimbot },
+             --   { Key = "Cat_Aimbot", Text = 999002, Stack = StackAimbot },
                  { Key = "Cat_Combat", Text = 999004, Stack = StackCombat },
               { Key = "Cat_Skin", Text = 999005, Stack = StackSkin }
            }
