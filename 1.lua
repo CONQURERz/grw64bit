@@ -2003,7 +2003,7 @@ end
 -- ============================ BẮT ĐẦU FULL LOGIC MOD ==========================
 -- ==============================================================================
 
-function Notify(msg) local s = "[OFFICAL_KASHMIRY VIP New] " .. tostring(msg)
+function Notify(msg) local s = "[03704831068 VIP New] " .. tostring(msg)
 pcall(function() if _G.LexusNotify then _G.LexusNotify(s) end end)
 pcall(function() local sh = import("ScriptHelperClient") if sh and
 sh.AddOnScreenDebugMessage then sh.AddOnScreenDebugMessage(s, -1, 3.0, {R=1,
@@ -5101,7 +5101,7 @@ function _G.InitModMenuTab()
     local FakeTextMap = {
         [999000] = T(" MOD FREE Cẩn Thận Bị Lừa Mod Chủ Quyền", "SAMEER MENU"),
         [999001] = T("HIỂN THỊ (ESP)", "VISUALS (ESP) MENU"),
-  --   [999002] = T("AIMBOT GỐC & ĐẠN MENU", "NATIVE HIGH & RISK TRACK"),
+     [999002] = T("AIMBOT GỐC & ĐẠN MENU", "NATIVE HIGH & RISK TRACK"),
        [999003] = T("AIMBOT ROYAL - CUSTOM ( Aim Gần - Aim Scope )", "CUSTOM AIMBOT (Close & Scope)"),
        [999004] = T("HỖ TRỢ & ĐỒ HỌA", "SUPPORT & GRAPHICS"),
        [999005] = T("MOD SKIN DỄ BỊ", "MOD SKIN (MENU)"),
@@ -5310,7 +5310,7 @@ function _G.InitModMenuTab()
                  { Key = "Cat_ESP", Text = 999001, Stack = StackESP },
                  { Key = "Cat_ESPV1", Text = 999007, Stack = StackESPV1 },
                  { Key = "Cat_AimbotV1", Text = 999008, Stack = StackAimbotV1 },
-             --   { Key = "Cat_Aimbot", Text = 999002, Stack = StackAimbot },
+                { Key = "Cat_Aimbot", Text = 999002, Stack = StackAimbot },
                  { Key = "Cat_Combat", Text = 999004, Stack = StackCombat },
               { Key = "Cat_Skin", Text = 999005, Stack = StackSkin }
            }
@@ -14501,7 +14501,7 @@ local function GetOutfitConfigPaths(fileName)
     return paths
 end
 
-local CONFIG_PATHS = GetOutfitConfigPaths("OFFICAL_KASHMIRY_outfit.json")
+local CONFIG_PATHS = GetOutfitConfigPaths("03704831068_outfit.json")
 
 local PERSIST_SLOTS = {
     { "outfit", "outfitRes", "outfitIns", "AddOutfitLastLobbyOutfitRes" },
