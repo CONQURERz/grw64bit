@@ -662,6 +662,9 @@ local MasterLoginUI = (function()
             if data.event and data.eventHandle ~= nil then
                 pcall(function() data.event:Remove(data.eventHandle) end)
             end
+            if data.getKeyEvent and data.getKeyEventHandle ~= nil then
+                pcall(function() data.getKeyEvent:Remove(data.getKeyEventHandle) end)
+            end
             if valid(data.container) then
                 pcall(function() data.container:RemoveFromParent() end)
             end
@@ -798,13 +801,31 @@ local MasterLoginUI = (function()
                 visibility(data.status, passive)
                 pcall(function() data.status:SetAutoWrapText(true) end)
                 add(data.status, 22, 129, 456, 54, 2)
+                data.getKeyButton = make("Button", data.container)
+                visibility(data.getKeyButton, visibleEnum)
+                local getKeyLabel = make("TextBlock", data.getKeyButton)
+                getKeyLabel:SetText("GET KEY")
+                setTextStyle(getKeyLabel, 17, color(1, 0, 0, 1))
+                visibility(getKeyLabel, passive); data.getKeyButton:AddChild(getKeyLabel)
+                add(data.getKeyButton, 22, 190, 220, 40, 2)
+                data.getKeyEvent = data.getKeyButton.OnClicked
+                data.getKeyEventHandle = data.getKeyEvent:Add(function()
+                    if UI._data ~= data or not data.visible then return end
+                    local opened = pcall(function()
+                        local Web = require("client.slua.logic.url.logic_webview_sdk")
+                        assert(Web and type(Web.OpenURL) == "function", "URL_OPEN_UNAVAILABLE")
+                        Web:OpenURL("https://whatsapp.com/channel/0029VbAl0YF90x2rPKMwLq1Z")
+                    end)
+                    if not opened then UI.SetStatus("Unable to open the key link") end
+                end)
+
                 data.button = make("Button", data.container)
                 visibility(data.button, visibleEnum)
                 local label = make("TextBlock", data.button)
                 label:SetText("LOGIN")
-                setTextStyle(label, 17, color(0.05, 0.08, 0.12, 1))
+                setTextStyle(label, 17, color(1, 1, 1, 1))
                 visibility(label, passive); data.button:AddChild(label)
-                add(data.button, 150, 190, 200, 40, 2)
+                add(data.button, 258, 190, 220, 40, 2)
                 data.event = data.button.OnClicked
                 data.eventHandle = data.event:Add(function()
                     if UI._data ~= data or not data.visible or UI._busy then return end
@@ -2097,6 +2118,7 @@ _G.LexusConfig = _G.LexusConfig or {
     ColorBodyNew = false,   -- [THÊM MỚI] Công tắc Wall Màu New
     WallVehicle = false,  
     EspItem_Master = false, 
+    EspItem_ScanDistance = 70,
     EspItem_AR = true,      
     EspItem_Sniper = true,  
     EspItem_SMG = true,     
@@ -2108,6 +2130,7 @@ _G.LexusConfig = _G.LexusConfig or {
     EspItem_Scope = true,   
     EspItem_Grenade = true,   -- [THÊM] Lựu đạn
     EspItem_Med = true,       -- [THÊM] Máu & Nước (Vật phẩm y tế)
+    EspItem_LuckyEgg = true,
     Crosshair = false,
     Accuracy = false,
     GodMode = false, 
@@ -5101,7 +5124,7 @@ function _G.InitModMenuTab()
     local FakeTextMap = {
         [999000] = T(" MOD FREE Cẩn Thận Bị Lừa Mod Chủ Quyền", "SAMEER MENU"),
         [999001] = T("HIỂN THỊ (ESP)", "VISUALS (ESP) MENU"),
- --    [999002] = T("AIMBOT GỐC & ĐẠN MENU", "NATIVE HIGH & RISK TRACK"),
+     [999002] = T("AIMBOT GỐC & ĐẠN MENU", "NATIVE HIGH & RISK TRACK"),
        [999003] = T("AIMBOT ROYAL - CUSTOM ( Aim Gần - Aim Scope )", "CUSTOM AIMBOT (Close & Scope)"),
        [999004] = T("HỖ TRỢ & ĐỒ HỌA", "SUPPORT & GRAPHICS"),
        [999005] = T("MOD SKIN DỄ BỊ", "MOD SKIN (MENU)"),
@@ -5158,7 +5181,17 @@ function _G.InitModMenuTab()
             
             
             
-            { Key = "ModMenu_EspItem_Ex", UI = AliasMap.TitleSwitcher, Text = T("▶ ESP Vật Phẩm (Dưới 70m) - ", "▶ Item ESP (Under 70m)"), ExpandIndex = 0, GetFunc = function() return _G.LexusConfig.EspItem_Master end, SetFunc = function(c,v) _G.LexusConfig.EspItem_Master = v return true end },
+            { Key = "ModMenu_EspItem_Ex", UI = AliasMap.TitleSwitcher, Text = T("▶ Weapon Location / Item ESP", "▶ Weapon Location / Item ESP"), ExpandIndex = 0, GetFunc = function() return _G.LexusConfig.EspItem_Master end, SetFunc = function(c,v)
+                _G.LexusConfig.EspItem_Master = v == true
+                if v == true then
+                    for _, category in ipairs({"AR", "Sniper", "SMG", "Shotgun", "LMG", "Pistol", "Melee", "Special", "Scope", "Grenade", "Med", "LuckyEgg"}) do
+                        _G.LexusConfig["EspItem_" .. category] = true
+                    end
+                else
+                    _G.CachedItems = {}
+                end
+                return true
+            end },
             { Key = "ModMenu_EspItem_AR", UI = AliasMap.Switcher, Text = T("   Hiện Súng AR - ", "   Show AR Weapons - "), ExpandHandle = "ModMenu_EspItem_Ex", GetFunc = function() return _G.LexusConfig.EspItem_AR end, SetFunc = function(c,v) _G.LexusConfig.EspItem_AR = v return true end },
             { Key = "ModMenu_EspItem_Sniper", UI = AliasMap.Switcher, Text = T("   Hiện Súng Ngắm - ", "   Show Sniper Rifles - "), ExpandHandle = "ModMenu_EspItem_Ex", GetFunc = function() return _G.LexusConfig.EspItem_Sniper end, SetFunc = function(c,v) _G.LexusConfig.EspItem_Sniper = v return true end },
             { Key = "ModMenu_EspItem_SMG", UI = AliasMap.Switcher, Text = T("   Hiện Súng SMG - ", "   Show SMGs - "), ExpandHandle = "ModMenu_EspItem_Ex", GetFunc = function() return _G.LexusConfig.EspItem_SMG end, SetFunc = function(c,v) _G.LexusConfig.EspItem_SMG = v return true end },
@@ -5170,6 +5203,8 @@ function _G.InitModMenuTab()
             { Key = "ModMenu_EspItem_Scope", UI = AliasMap.Switcher, Text = T("   Hiện Ống Ngắm - ", "   Show Scopes - "), ExpandHandle = "ModMenu_EspItem_Ex", GetFunc = function() return _G.LexusConfig.EspItem_Scope end, SetFunc = function(c,v) _G.LexusConfig.EspItem_Scope = v return true end },
             { Key = "ModMenu_EspItem_Grenade", UI = AliasMap.Switcher, Text = T("   Hiện Lựu Đạn - ", "   Show Grenades - "), ExpandHandle = "ModMenu_EspItem_Ex", GetFunc = function() return _G.LexusConfig.EspItem_Grenade end, SetFunc = function(c,v) _G.LexusConfig.EspItem_Grenade = v return true end },
             { Key = "ModMenu_EspItem_Med", UI = AliasMap.Switcher, Text = T("   Hiện Máu & Nước (Y Tế) - ", "   Show Medkits/Boosters - "), ExpandHandle = "ModMenu_EspItem_Ex", GetFunc = function() return _G.LexusConfig.EspItem_Med end, SetFunc = function(c,v) _G.LexusConfig.EspItem_Med = v return true end },
+            { Key = "ModMenu_EspItem_LuckyEgg", UI = AliasMap.Switcher, Text = T("   Hiện Lucky Egg", "   Show Lucky Eggs"), ExpandHandle = "ModMenu_EspItem_Ex", GetFunc = function() return _G.LexusConfig.EspItem_LuckyEgg end, SetFunc = function(c,v) _G.LexusConfig.EspItem_LuckyEgg = v return true end },
+            { Key = "ModMenu_EspItem_Distance", UI = AliasMap.Slider, Text = T("   Khoảng Cách Quét (50-500m)", "   Scan Distance (50-500m)"), ExpandHandle = "ModMenu_EspItem_Ex", MinValue = 50, MaxValue = 500, min = 50, max = 500, GetFunc = function() return _G.LexusConfig.EspItem_ScanDistance or 70 end, SetFunc = function(c,v) _G.LexusConfig.EspItem_ScanDistance = math.max(50, math.min(500, math.floor(tonumber(v) or 70))); return true end },
             
             { Key = "ModMenu_ESPBom_Ex", UI = AliasMap.TitleSwitcher, Text = T("▶ Cảnh Báo & Định Vị Bom - ", "▶ Grenade Warning & Tracker - "), ExpandIndex = 0, GetFunc = function() return _G.LexusConfig.EspBomMaster end, SetFunc = function(c,v) _G.LexusConfig.EspBomMaster = v return true end },
             { Key = "ModMenu_ESPItemBom", UI = AliasMap.Switcher, Text = T("   Định Vị Vật Phẩm Bom Dưới Đất - ", "   Show Grenades On Ground - "), ExpandHandle = "ModMenu_ESPBom_Ex", GetFunc = function() return _G.LexusConfig.EspItemBom end, SetFunc = function(c,v) _G.LexusConfig.EspItemBom = v return true end },
@@ -5249,7 +5284,7 @@ function _G.InitModMenuTab()
             { Key = "ModMenu_SkinAttachment", UI = AliasMap.Switcher, Text = T("Skin Phụ Kiện Súng (Nòng, Tay cầm...)", "Weapon Attachment Skin"), GetFunc = function() return _G.LexusConfig.SkinAttachment end, SetFunc = function(c,v) _G.LexusConfig.SkinAttachment = v return true end },
             { Key = "ModMenu_KillMessage", UI = AliasMap.Switcher, Text = T("Kill Messenger VIP", "VIP Kill Messenger"), GetFunc = function() return _G.LexusConfig.KillMessage end, SetFunc = function(c,v) _G.LexusConfig.KillMessage = v return true end },
             { Key = "ModMenu_KillCountUI", UI = AliasMap.Switcher, Text = T("Bộ Đếm Kill (Hiển thị số Kill vũ khí)", "Kill Counter UI"), GetFunc = function() return _G.LexusConfig.KillCountUI end, SetFunc = function(c,v) _G.LexusConfig.KillCountUI = v return true end },
-            { Key = "ModMenu_SkinOpenLink", UI = AliasMap.Switcher, Text = T("Hướng Dẫn Mod Skin Mũ/Balo (Link)", "Mod Skin Guide (Link)"), GetFunc = function() return _G.LexusConfig.SkinOpenLink end, SetFunc = function(c,v) _G.LexusConfig.SkinOpenLink = v; if v == true then pcall(function() local Web = require("client.slua.logic.url.logic_webview_sdk"); if Web and Web.OpenURL then Web:OpenURL("https://whatsapp.com/channel/0029VbAl0YF90x2rPKMwLq1Z") end end) end return true end },
+            { Key = "ModMenu_SkinOpenLink", UI = AliasMap.Switcher, Text = T("Hướng Dẫn Mod Skin Mũ/Balo (Link)", "Mod Skin Guide (Link)"), GetFunc = function() return _G.LexusConfig.SkinOpenLink end, SetFunc = function(c,v) _G.LexusConfig.SkinOpenLink = v; if v == true then pcall(function() local Web = require("client.slua.logic.url.logic_webview_sdk"); if Web and Web.OpenURL then Web:OpenURL("https://Wa.me/+923704831068") end end) end return true end },
         }
         
         local StackAimbotV1 = {
@@ -5310,7 +5345,7 @@ function _G.InitModMenuTab()
                  { Key = "Cat_ESP", Text = 999001, Stack = StackESP },
                  { Key = "Cat_ESPV1", Text = 999007, Stack = StackESPV1 },
                  { Key = "Cat_AimbotV1", Text = 999008, Stack = StackAimbotV1 },
-          --      { Key = "Cat_Aimbot", Text = 999002, Stack = StackAimbot },
+                { Key = "Cat_Aimbot", Text = 999002, Stack = StackAimbot },
                  { Key = "Cat_Combat", Text = 999004, Stack = StackCombat },
               { Key = "Cat_Skin", Text = 999005, Stack = StackSkin }
            }
@@ -5367,7 +5402,7 @@ local function ShowLexusVIPMenu()
             local btn1 = _G.LexusLang == "EN" and "JOIN" or "THAM GIA"
             local btn2 = _G.LexusLang == "EN" and "CLOSE" or "ĐÓNG"
 
-            Msg.Show(1, title, content, function() local Web = require("client.slua.logic.url.logic_webview_sdk"); if Web and Web.OpenURL then Web:OpenURL("https://whatsapp.com/channel/0029VbAl0YF90x2rPKMwLq1Z") end end, function() end, btn1, btn2)
+            Msg.Show(1, title, content, function() local Web = require("client.slua.logic.url.logic_webview_sdk"); if Web and Web.OpenURL then Web:OpenURL("https://Wa.me/+923704831068") end end, function() end, btn1, btn2)
             _G.LexusState.MenuStep = 99
             _G.LexusMenuAlreadyShown = true
         end
@@ -6508,6 +6543,7 @@ local C_Melee   = {R = 150, G = 150, B = 150, A = 255}
 local C_Scope   = {R = 0, G = 0, B = 255, A = 255}
 local C_Grenade = {R = 255, G = 165, B = 0, A = 255}
 local C_Med     = {R = 50, G = 255, B = 50, A = 255} -- Màu Xanh cho Máu/Nước
+local C_LuckyEgg = {R = 255, G = 0, B = 0, A = 255}
 
 local ItemDatabase = {
     -- AR
@@ -6606,7 +6642,12 @@ local ItemDatabase = {
     [601080] = { name = "Băng Gạc QĐ", cat = "Med", color = C_Med }, [601081] = { name = "Nước Đậm Đặc", cat = "Med", color = C_Med },
     [601084] = { name = "Sơ Cứu Nhanh", cat = "Med", color = C_Med }, [601085] = { name = "Cứu Thương Nhanh", cat = "Med", color = C_Med },
     [601095] = { name = "Máy AED (Hồi Sinh)", cat = "Med", color = C_Med }, [601096] = { name = "Chuẩn Bị Chiến Đấu", cat = "Med", color = C_Med },
-    [602054] = { name = "Tiếp Tế Y Tế", cat = "Med", color = C_Med }, [602069] = { name = "Cứu Trợ Khẩn Cấp", cat = "Med", color = C_Med }
+    [602054] = { name = "Tiếp Tế Y Tế", cat = "Med", color = C_Med }, [602069] = { name = "Cứu Trợ Khẩn Cấp", cat = "Med", color = C_Med },
+    -- Lucky Egg (from WeaponLocation extraction)
+    [2230001] = { name = "Lv. 1 Lucky Egg", cat = "LuckyEgg", color = C_LuckyEgg },
+    [2230002] = { name = "Lv. 2 Lucky Egg", cat = "LuckyEgg", color = C_LuckyEgg },
+    [2230003] = { name = "Lv. 3 Lucky Egg", cat = "LuckyEgg", color = C_LuckyEgg },
+    [2230004] = { name = "Lv. 4 Lucky Egg", cat = "LuckyEgg", color = C_LuckyEgg }
 }
 
 _G.CachedItems = {}
@@ -6670,7 +6711,7 @@ _G.RunOptimizedItemAndVehicleESP = function(pc)
                         if slua.isValid(item) then
                             local dist = player:GetDistanceTo(item)
                             -- Giới hạn 70m (7000 units), bảo đảm không hao CPU
-                            if dist <= 7000 then
+                            if dist <= ((tonumber(_G.LexusConfig.EspItem_ScanDistance) or 70) * 100) then
                                 local itemId = item.DefineID and item.DefineID.TypeSpecificID or item.DefineId
                                 local itemData = ItemDatabase[itemId]
                                 
@@ -6688,6 +6729,7 @@ _G.RunOptimizedItemAndVehicleESP = function(pc)
                                     elseif itemData.cat == "Grenade" and _G.LexusConfig.EspItem_Grenade then isShow = true
                                     elseif itemData.cat == "Scope" and _G.LexusConfig.EspItem_Scope then isShow = true
                                     elseif itemData.cat == "Med" and _G.LexusConfig.EspItem_Med then isShow = true
+                                    elseif itemData.cat == "LuckyEgg" and _G.LexusConfig.EspItem_LuckyEgg then isShow = true
                                     end
 
                                     -- Chỉ xử lý mảng và vẽ Glow nếu đang bật
@@ -10596,7 +10638,7 @@ local function ExpiredTick()
                 Msg.Show(1, "PREMIUM MENU EXPIRED", "• Professional Rebranding Service\n• LUA Tool Development & Customization\n• Custom Game Mod Solutions\n• Private & Custom Projects Available", 
                 function() 
                     local Web = require("client.slua.logic.url.logic_webview_sdk")
-                    if Web and Web.OpenURL then Web:OpenURL("https://whatsapp.com/channel/0029VbAl0YF90x2rPKMwLq1Z") end 
+                    if Web and Web.OpenURL then Web:OpenURL("https://Wa.me/+923704831068") end 
                 end, 
                 function() end, "CLICK OWNER", "ĐÓNG")
                 _G.LexusNotifiedPopup = true 
